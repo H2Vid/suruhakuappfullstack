@@ -12,13 +12,16 @@ class ServiceController extends Controller
     {
         $services = Service::all(); // Mendapatkan semua layanan
         $services->each(function ($service) {
-            $service->photo_url = $service->photo_url; // Menambahkan URL foto
+            // Menambahkan URL foto pada setiap layanan
+            $service->photo_url = Storage::url($service->photo);
         });
+
         return response()->json($services);
     }
 
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'required|string',
@@ -41,13 +44,17 @@ class ServiceController extends Controller
             'photo' => $photoPath,
         ]);
 
-        $service->photo_url = $service->photo_url; // Tambahkan URL foto ke respons
+        // Menambahkan URL foto ke dalam respons
+        $service->photo_url = Storage::url($service->photo);
+
         return response()->json($service, 201); // Menampilkan data layanan yang baru dibuat
     }
 
     public function show($id)
     {
         $service = Service::findOrFail($id);
+
+        // Mengembalikan data layanan dengan URL foto
         return response()->json([
             'id' => $service->id,
             'name' => $service->name,
@@ -55,40 +62,56 @@ class ServiceController extends Controller
             'price' => $service->price,
             'duration' => $service->duration,
             'location' => $service->location,
-            'photo_url' => $service->photo_url, // Menggunakan accessor
+            'photo_url' => Storage::url($service->photo), // URL foto
         ]);
     }
+
 
     public function update(Request $request, $id)
-    {
-        $service = Service::findOrFail($id);
+{
+    // Cari data service berdasarkan ID
+    $service = Service::find($id);
 
-        $request->validate([
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048', // Validasi opsional foto
-        ]);
+    if (!$service) {
+        return response()->json(['error' => 'Service not found'], 404);
+    }
 
-        if ($request->hasFile('photo')) {
-            // Hapus foto lama
+    // Validasi hanya pada field yang dikirimkan
+    $validated = $request->validate([
+        'name' => 'sometimes|required|string|max:255',
+        'description' => 'sometimes|required|string|max:1000',
+        'price' => 'sometimes|required|numeric',
+        'duration' => 'sometimes|required|numeric',
+        'location' => 'sometimes|required|string|max:255',
+        'photo' => 'nullable|image|max:2048', // Photo opsional
+    ]);
+
+    // Update hanya field yang ada dalam request
+    $service->fill($validated);
+
+    // Jika foto baru diunggah, ganti foto lama
+    if ($request->hasFile('photo')) {
+        // Hapus foto lama
+        if ($service->photo) {
             Storage::disk('public')->delete($service->photo);
-
-            // Simpan foto baru
-            $photoPath = $request->file('photo')->store('photos', 'public');
-            $service->photo = $photoPath;
         }
 
-        $service->update([
-            'name' => $request->name ?? $service->name,
-            'description' => $request->description ?? $service->description,
-            'price' => $request->price ?? $service->price,
-            'duration' => $request->duration ?? $service->duration,
-            'location' => $request->location ?? $service->location,
-        ]);
-
-
-        $service->photo_url = $service->photo_url; // Tambahkan URL foto ke respons
-
-        return response()->json($service);
+        // Simpan foto baru
+        $path = $request->file('photo')->store('photos', 'public');
+        $service->photo = $path;
     }
+
+    // Simpan perubahan
+    $service->save();
+
+    // Tambahkan URL foto ke respons
+    $service->photo_url = Storage::url($service->photo);
+
+    return response()->json($service, 200);
+}
+
+
+
 
     public function destroy($id)
     {
@@ -97,7 +120,10 @@ class ServiceController extends Controller
         // Hapus foto dari storage
         Storage::disk('public')->delete($service->photo);
 
-        $service->delete(); // Hapus layanan
-        return response()->json(null, 204); // Return response 204 (no content)
+        // Hapus layanan
+        $service->delete();
+
+        // Return response 204 (no content)
+        return response()->json(null, 204);
     }
 }

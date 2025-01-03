@@ -13,7 +13,7 @@ const ServiceList = () => {
     const fetchServicesData = async () => {
         try {
             const response = await axios.get("/api/services");
-            setServices(response.data); // Pastikan API mengembalikan array
+            setServices(response.data);
         } catch (error) {
             console.error("Error fetching services:", error);
         }
@@ -34,13 +34,14 @@ const ServiceList = () => {
     };
 
     const handleEditService = (service) => {
-        console.log("Editing service:", service); // Debugging
         setCurrentService(service);
         setShowForm(true);
     };
 
-    const handleSubmit = async (e, formData) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        const formData = new FormData(e.target);
+
         try {
             const form = new FormData();
             form.append("name", formData.get("name"));
@@ -48,18 +49,21 @@ const ServiceList = () => {
             form.append("price", formData.get("price"));
             form.append("duration", formData.get("duration"));
             form.append("location", formData.get("location"));
-            form.append("photo", formData.get("photo"));
+
+            const fileInput = formData.get("photo");
+            if (fileInput && fileInput.size > 0) {
+                form.append("photo", fileInput);
+            }
 
             if (currentService) {
-                // Update existing service
-                await axios.put(
-                    `/api/services/${currentService.service_id}`,
+                await axios.post(
+                    `/api/services/${currentService.service_id}?_method=PUT`,
                     form
                 );
             } else {
-                // Add new service
                 await axios.post("/api/services", form);
             }
+
             fetchServicesData();
             setShowForm(false);
         } catch (error) {
@@ -83,11 +87,7 @@ const ServiceList = () => {
                     <h3 className="text-lg font-semibold">
                         {currentService ? "Edit Service" : "Add New Service"}
                     </h3>
-                    <form
-                        onSubmit={(e) =>
-                            handleSubmit(e, new FormData(e.target))
-                        }
-                    >
+                    <form onSubmit={handleSubmit}>
                         <label className="block text-sm font-medium">
                             Name
                         </label>
@@ -190,7 +190,9 @@ const ServiceList = () => {
                         <tr key={service.service_id} className="border-b">
                             <td className="px-4 py-2">{service.name}</td>
                             <td className="px-4 py-2">{service.description}</td>
-                            <td className="px-4 py-2">{service.price}</td>
+                            <td className="px-4 py-2">
+                                {parseInt(service.price)}
+                            </td>
                             <td className="px-4 py-2">
                                 {service.duration} mins
                             </td>
