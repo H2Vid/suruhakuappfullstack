@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const UserLandingPage = () => {
+const Orders = () => {
     const navigate = useNavigate();
     const [services, setServices] = useState([]);
     const [search, setSearch] = useState("");
@@ -30,9 +30,7 @@ const UserLandingPage = () => {
     const fetchUserName = async () => {
         try {
             const user = JSON.parse(localStorage.getItem("user"));
-            const response = await axios.get(
-                "/api/users"
-            );
+            const response = await axios.get("/api/users");
             const currentUser = response.data.data.find(
                 (userData) => userData.user_id === user.user_id
             );
@@ -97,4 +95,4 @@ const UserLandingPage = () => {
     );
 };
 
-export default UserLandingPage;
+export default Orders;
