@@ -11,9 +11,7 @@ const OrderList = () => {
 
     const fetchOrders = async () => {
         try {
-            const response = await axios.get(
-                "http://suruhappbe.test/api/orders"
-            );
+            const response = await axios.get("/api/orders");
             if (Array.isArray(response.data.data)) {
                 setOrders(response.data.data);
             } else {
@@ -27,10 +25,9 @@ const OrderList = () => {
 
     const updateStatus = async (orderId, newStatus) => {
         try {
-            const response = await axios.put(
-                `http://suruhappbe.test/api/orders/${orderId}`,
-                { status: newStatus }
-            );
+            const response = await axios.put(`/api/orders/${orderId}`, {
+                status: newStatus,
+            });
             alert(response.data.message); // Tampilkan pesan sukses
             // Perbarui status pada state lokal
             setOrders((prevOrders) =>
