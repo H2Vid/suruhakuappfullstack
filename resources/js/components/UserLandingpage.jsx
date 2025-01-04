@@ -8,6 +8,11 @@ const UserLandingPage = () => {
     const [search, setSearch] = useState("");
     const [locationFilter, setLocationFilter] = useState("");
     const [filteredServices, setFilteredServices] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false); // State untuk kontrol modal
+    const [selectedServiceId, setSelectedServiceId] = useState(null); // ID layanan yang dipilih
+    const [orderDate, setOrderDate] = useState(""); // Waktu layanan
+    const [address, setAddress] = useState(""); // Alamat customer
+    const [paymentProof, setPaymentProof] = useState(null); // Foto bukti pembayaran
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -49,8 +54,38 @@ const UserLandingPage = () => {
         navigate("/");
     };
 
+    // Fungsi untuk menangani pemesanan layanan dan membuka modal
     const handleOrderService = (serviceId) => {
-        navigate(`/order/${serviceId}`);
+        setSelectedServiceId(serviceId); // Menyimpan ID layanan yang dipilih
+        setIsModalOpen(true); // Menampilkan modal
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false); // Menutup modal
+        setOrderDate("");
+        setAddress("");
+        setPaymentProof(null);
+    };
+
+    const handleSubmitOrder = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append("order_date", orderDate);
+        formData.append("address", address);
+        formData.append("payment_proof", paymentProof);
+        formData.append("service_id", selectedServiceId);
+
+        try {
+            const response = await axios.post("/api/orders", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            console.log("Order placed successfully:", response.data);
+            closeModal(); // Menutup modal setelah order dibuat
+        } catch (error) {
+            console.error("Error placing order:", error);
+        }
     };
 
     const handleViewOrders = () => {
@@ -155,6 +190,89 @@ const UserLandingPage = () => {
                     ))}
                 </div>
             </main>
+
+            {/* Modal Form Order */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white p-6 rounded-md w-96">
+                        <h2 className="text-xl font-bold mb-4">
+                            Pesan Layanan
+                        </h2>
+                        <form
+                            onSubmit={handleSubmitOrder}
+                            className="space-y-4"
+                        >
+                            <div>
+                                <label
+                                    htmlFor="orderDate"
+                                    className="block font-medium"
+                                >
+                                    Waktu Layanan
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    id="orderDate"
+                                    value={orderDate}
+                                    onChange={(e) =>
+                                        setOrderDate(e.target.value)
+                                    }
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="address"
+                                    className="block font-medium"
+                                >
+                                    Alamat
+                                </label>
+                                <input
+                                    type="text"
+                                    id="address"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                    placeholder="Masukkan alamat Anda"
+                                />
+                            </div>
+
+                            <div>
+                                <label
+                                    htmlFor="paymentProof"
+                                    className="block font-medium"
+                                >
+                                    Foto Bukti Pembayaran
+                                </label>
+                                <input
+                                    type="file"
+                                    id="paymentProof"
+                                    onChange={(e) =>
+                                        setPaymentProof(e.target.files[0])
+                                    }
+                                    className="w-full p-2 border border-gray-300 rounded"
+                                />
+                            </div>
+
+                            <div className="flex justify-between mt-4">
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                >
+                                    Pesan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
