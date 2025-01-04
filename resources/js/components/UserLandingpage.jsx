@@ -8,17 +8,17 @@ const UserLandingPage = () => {
     const [search, setSearch] = useState("");
     const [locationFilter, setLocationFilter] = useState("");
     const [filteredServices, setFilteredServices] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State untuk kontrol modal
-    const [selectedServiceId, setSelectedServiceId] = useState(null); // ID layanan yang dipilih
-    const [orderDate, setOrderDate] = useState(""); // Waktu layanan
-    const [address, setAddress] = useState(""); // Alamat customer
-    const [paymentProof, setPaymentProof] = useState(null); // Foto bukti pembayaran
-    const [userName, setUserName] = useState("Pengguna"); // Nama pengguna
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedServiceId, setSelectedServiceId] = useState(null);
+    const [orderDate, setOrderDate] = useState("");
+    const [address, setAddress] = useState("");
+    const [paymentProof, setPaymentProof] = useState(null);
+    const [userName, setUserName] = useState("Pengguna");
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (!user || user.role !== "customer") {
-            navigate("/"); // Redirect ke login jika tidak ada user
+            navigate("/");
         }
         fetchServices();
         fetchUserName();
@@ -31,15 +31,14 @@ const UserLandingPage = () => {
             setFilteredServices(response.data);
         } catch (error) {
             console.error("Error fetching services:", error);
+            alert("Gagal memuat layanan. Silakan coba lagi.");
         }
     };
 
     const fetchUserName = async () => {
         try {
             const user = JSON.parse(localStorage.getItem("user"));
-            const response = await axios.get(
-                "/api/users"
-            );
+            const response = await axios.get("/api/users");
             const currentUser = response.data.data.find(
                 (userData) => userData.user_id === user.user_id
             );
@@ -51,11 +50,13 @@ const UserLandingPage = () => {
 
     const handleSearch = () => {
         let results = services;
+
         if (search) {
             results = results.filter((service) =>
                 service.name.toLowerCase().includes(search.toLowerCase())
             );
         }
+
         if (locationFilter) {
             results = results.filter((service) =>
                 service.location
@@ -63,6 +64,7 @@ const UserLandingPage = () => {
                     .includes(locationFilter.toLowerCase())
             );
         }
+
         setFilteredServices(results);
     };
 
@@ -96,8 +98,6 @@ const UserLandingPage = () => {
         formData.append("address", address);
         formData.append("payment_proof", paymentProof);
         formData.append("service_id", selectedServiceId);
-
-        // Menambahkan data nama pengguna, nama layanan, dan harga layanan
         formData.append("user_name", userName);
         formData.append(
             "service_name",
@@ -131,7 +131,6 @@ const UserLandingPage = () => {
 
     return (
         <div className="flex h-screen bg-gray-100">
-            {/* Sidebar (Navbar Kiri) */}
             <aside className="w-64 bg-white shadow-md p-4">
                 <h2 className="text-2xl font-bold mb-6 text-gray-700">
                     Selamat Datang, {userName}
@@ -157,24 +156,22 @@ const UserLandingPage = () => {
                     </ul>
                 </nav>
             </aside>
-
-            {/* Main Content */}
             <main className="flex-1 p-6">
-                <header className="flex justify-between items-center mb-6">
-                    <div className="flex space-x-4">
+                <header className="flex flex-wrap justify-between items-center mb-6 space-y-4 md:space-y-0">
+                    <div className="flex flex-wrap gap-4">
                         <input
                             type="text"
                             placeholder="Cari layanan..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-60 p-2 border border-gray-300 rounded"
+                            className="w-full md:w-60 p-2 border border-gray-300 rounded"
                         />
                         <input
                             type="text"
                             placeholder="Filter lokasi..."
                             value={locationFilter}
                             onChange={(e) => setLocationFilter(e.target.value)}
-                            className="w-60 p-2 border border-gray-300 rounded"
+                            className="w-full md:w-60 p-2 border border-gray-300 rounded"
                         />
                         <button
                             onClick={handleSearch}
@@ -190,43 +187,47 @@ const UserLandingPage = () => {
                         Logout
                     </button>
                 </header>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredServices.map((service) => (
-                        <div
-                            key={service.service_id}
-                            className="p-4 bg-white shadow rounded"
-                        >
-                            <img
-                                src={service.photo_url}
-                                alt={service.name}
-                                className="w-full h-40 object-cover rounded mb-4"
-                            />
-                            <h3 className="text-lg font-bold">
-                                {service.name}
-                            </h3>
-                            <p className="text-gray-600">
-                                {service.description}
-                            </p>
-                            <p className="mt-2 font-semibold">
-                                Rp {Math.trunc(service.price)}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                                Lokasi: {service.location}
-                            </p>
-                            <button
-                                onClick={() =>
-                                    handleOrderService(service.service_id)
-                                }
-                                className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    {filteredServices.length > 0 ? (
+                        filteredServices.map((service) => (
+                            <div
+                                key={service.service_id}
+                                className="p-4 bg-white shadow rounded"
                             >
-                                Pesan Layanan
-                            </button>
-                        </div>
-                    ))}
+                                <img
+                                    src={service.photo_url}
+                                    alt={service.name}
+                                    className="w-full h-40 object-cover rounded mb-4"
+                                />
+                                <h3 className="text-lg font-bold">
+                                    {service.name}
+                                </h3>
+                                <p className="text-gray-600">
+                                    {service.description}
+                                </p>
+                                <p className="mt-2 font-semibold">
+                                    Rp {Math.trunc(service.price)}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Lokasi: {service.location}
+                                </p>
+                                <button
+                                    onClick={() =>
+                                        handleOrderService(service.service_id)
+                                    }
+                                    className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                >
+                                    Pesan Layanan
+                                </button>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-center text-gray-500 col-span-full">
+                            Tidak ada layanan yang ditemukan.
+                        </p>
+                    )}
                 </div>
             </main>
-
             {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white p-6 rounded-md w-96">
@@ -254,7 +255,6 @@ const UserLandingPage = () => {
                                     className="w-full p-2 border border-gray-300 rounded"
                                 />
                             </div>
-
                             <div>
                                 <label
                                     htmlFor="address"
@@ -271,7 +271,6 @@ const UserLandingPage = () => {
                                     placeholder="Masukkan alamat Anda"
                                 />
                             </div>
-
                             <div>
                                 <label
                                     htmlFor="paymentProof"
@@ -288,7 +287,6 @@ const UserLandingPage = () => {
                                     className="w-full p-2 border border-gray-300 rounded"
                                 />
                             </div>
-
                             <div className="flex justify-between mt-4">
                                 <button
                                     type="button"
