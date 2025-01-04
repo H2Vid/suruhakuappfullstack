@@ -67,4 +67,27 @@ class OrderController extends Controller
 
         return response()->json($order);
     }
+    public function update(Request $request, $id)
+{
+    // Validasi input
+    $request->validate([
+        'status' => 'required|in:pending,accepted,completed,canceled', // Validasi status
+    ]);
+
+    // Cari order berdasarkan ID
+    $order = Order::findOrFail($id);
+
+    // Perbarui status
+    $order->status = $request->status;
+    $order->save();
+
+    // Tambahkan URL bukti pembayaran dalam respons
+    $order->payment_proof = Storage::url($order->payment_proof);
+
+    return response()->json([
+        'message' => 'Order status updated successfully',
+        'order' => $order,
+    ], 200);
+}
+
 }

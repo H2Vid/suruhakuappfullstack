@@ -27,9 +27,12 @@ const OrderList = () => {
 
     const updateStatus = async (orderId, newStatus) => {
         try {
-            await axios.put(`http://suruhappbe.test/api/orders/${orderId}`, {
-                status: newStatus,
-            });
+            const response = await axios.put(
+                `http://suruhappbe.test/api/orders/${orderId}`,
+                { status: newStatus }
+            );
+            alert(response.data.message); // Tampilkan pesan sukses
+            // Perbarui status pada state lokal
             setOrders((prevOrders) =>
                 prevOrders.map((order) =>
                     order.id === orderId
@@ -39,6 +42,7 @@ const OrderList = () => {
             );
         } catch (error) {
             console.error("Error updating status:", error);
+            alert("Gagal memperbarui status pesanan.");
         }
     };
 
