@@ -8,6 +8,7 @@ import Login from "./components/LoginForm"; //komponen login
 import UserLandingpage from "./components/UserLandingpage"; // Landing page untuk customer
 import RegisterForm from "./components/RegisterForm";
 import DashboardAdmin from "./components/Dashboard/DashboardAdmin";
+import Orders from "./components/Orders";
 
 const App = () => {
     return (
@@ -17,6 +18,7 @@ const App = () => {
                 <Route path="/register" element={<RegisterForm />} />
                 <Route path="/user-landingpage" element={<UserLandingpage />} />
                 <Route path="/admin-dashboard" element={<DashboardAdmin />} />
+                <Route path="/my-orders" element={<Orders />} />
             </Routes>
         </Router>
     );
