@@ -13,6 +13,7 @@ const UserLandingPage = () => {
     const [orderDate, setOrderDate] = useState(""); // Waktu layanan
     const [address, setAddress] = useState(""); // Alamat customer
     const [paymentProof, setPaymentProof] = useState(null); // Foto bukti pembayaran
+    const [userName, setUserName] = useState("Pengguna"); // Nama pengguna
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -20,6 +21,7 @@ const UserLandingPage = () => {
             navigate("/"); // Redirect ke login jika tidak ada user
         }
         fetchServices();
+        fetchUserName();
     }, [navigate]);
 
     const fetchServices = async () => {
@@ -29,6 +31,21 @@ const UserLandingPage = () => {
             setFilteredServices(response.data);
         } catch (error) {
             console.error("Error fetching services:", error);
+        }
+    };
+
+    const fetchUserName = async () => {
+        try {
+            const user = JSON.parse(localStorage.getItem("user"));
+            const response = await axios.get(
+                "http://suruhappbe.test/api/users"
+            );
+            const currentUser = response.data.data.find(
+                (userData) => userData.user_id === user.user_id
+            );
+            setUserName(currentUser ? currentUser.name : "Pengguna");
+        } catch (error) {
+            console.error("Error fetching user name:", error);
         }
     };
 
@@ -54,14 +71,13 @@ const UserLandingPage = () => {
         navigate("/");
     };
 
-    // Fungsi untuk menangani pemesanan layanan dan membuka modal
     const handleOrderService = (serviceId) => {
-        setSelectedServiceId(serviceId); // Menyimpan ID layanan yang dipilih
-        setIsModalOpen(true); // Menampilkan modal
+        setSelectedServiceId(serviceId);
+        setIsModalOpen(true);
     };
 
     const closeModal = () => {
-        setIsModalOpen(false); // Menutup modal
+        setIsModalOpen(false);
         setOrderDate("");
         setAddress("");
         setPaymentProof(null);
@@ -82,7 +98,7 @@ const UserLandingPage = () => {
                 },
             });
             console.log("Order placed successfully:", response.data);
-            closeModal(); // Menutup modal setelah order dibuat
+            closeModal();
         } catch (error) {
             console.error("Error placing order:", error);
         }
@@ -96,7 +112,9 @@ const UserLandingPage = () => {
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar (Navbar Kiri) */}
             <aside className="w-64 bg-white shadow-md p-4">
-                <h2 className="text-2xl font-bold mb-6 text-gray-700">Menu</h2>
+                <h2 className="text-2xl font-bold mb-6 text-gray-700">
+                    Selamat Datang, {userName}
+                </h2>
                 <nav>
                     <ul className="space-y-4">
                         <li>
@@ -122,7 +140,6 @@ const UserLandingPage = () => {
             {/* Main Content */}
             <main className="flex-1 p-6">
                 <header className="flex justify-between items-center mb-6">
-                    {/* Search and Filter */}
                     <div className="flex space-x-4">
                         <input
                             type="text"
@@ -145,7 +162,6 @@ const UserLandingPage = () => {
                             Cari
                         </button>
                     </div>
-                    {/* Logout */}
                     <button
                         onClick={handleLogout}
                         className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
@@ -154,7 +170,6 @@ const UserLandingPage = () => {
                     </button>
                 </header>
 
-                {/* Services List */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredServices.map((service) => (
                         <div
@@ -191,7 +206,6 @@ const UserLandingPage = () => {
                 </div>
             </main>
 
-            {/* Modal Form Order */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white p-6 rounded-md w-96">
@@ -210,7 +224,7 @@ const UserLandingPage = () => {
                                     Waktu Layanan
                                 </label>
                                 <input
-                                    type="datetime-local"
+                                    type="date"
                                     id="orderDate"
                                     value={orderDate}
                                     onChange={(e) =>
