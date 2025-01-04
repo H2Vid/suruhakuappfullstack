@@ -85,11 +85,30 @@ const UserLandingPage = () => {
 
     const handleSubmitOrder = async (e) => {
         e.preventDefault();
+
+        if (!orderDate || !address || !paymentProof) {
+            alert("Pastikan semua kolom terisi dengan benar.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("order_date", orderDate);
         formData.append("address", address);
         formData.append("payment_proof", paymentProof);
         formData.append("service_id", selectedServiceId);
+
+        // Menambahkan data nama pengguna, nama layanan, dan harga layanan
+        formData.append("user_name", userName);
+        formData.append(
+            "service_name",
+            services.find((service) => service.service_id === selectedServiceId)
+                .name
+        );
+        formData.append(
+            "service_price",
+            services.find((service) => service.service_id === selectedServiceId)
+                .price
+        );
 
         try {
             const response = await axios.post("/api/orders", formData, {
@@ -98,9 +117,11 @@ const UserLandingPage = () => {
                 },
             });
             console.log("Order placed successfully:", response.data);
+            alert("Layanan berhasil diorder!");
             closeModal();
         } catch (error) {
             console.error("Error placing order:", error);
+            alert("Terjadi kesalahan saat memesan layanan. Coba lagi.");
         }
     };
 

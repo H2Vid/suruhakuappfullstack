@@ -11,5 +11,8 @@ class Order extends Model
         'address',
         'payment_proof',
         'status',
+        'user_name',        // Kolom nama pengguna
+        'service_name',     // Kolom nama layanan
+        'service_price',
     ];
 }

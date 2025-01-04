@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('address');
             $table->string('payment_proof')->nullable(); // Foto pembayaran
             $table->enum('status', ['pending', 'accepted', 'completed', 'canceled'])->default('pending');
+            // Menambahkan kolom baru
+            $table->string('user_name'); // Nama pengguna
+            $table->string('service_name'); // Nama layanan
+            $table->decimal('service_price', 10, 2); // Harga layanan
             $table->timestamps();
         });
     }
