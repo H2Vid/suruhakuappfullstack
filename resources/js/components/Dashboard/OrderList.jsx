@@ -71,7 +71,7 @@ const OrderList = () => {
                                 ID
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Nama Layanan
+                                Nama Customer
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Tanggal Pesanan
@@ -98,7 +98,7 @@ const OrderList = () => {
                                         {order.id}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
-                                        {order.service_name}
+                                        {order.user_name}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-700">
                                         {new Date(
