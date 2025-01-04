@@ -38,7 +38,7 @@ const UserLandingPage = () => {
         try {
             const user = JSON.parse(localStorage.getItem("user"));
             const response = await axios.get(
-                "http://suruhappbe.test/api/users"
+                "/api/users"
             );
             const currentUser = response.data.data.find(
                 (userData) => userData.user_id === user.user_id
