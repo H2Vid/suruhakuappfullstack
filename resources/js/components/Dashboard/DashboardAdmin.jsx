@@ -15,10 +15,9 @@ const DashboardAdmin = () => {
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (!user || user.role !== "provider") {
-            navigate("/"); // Redirect ke login jika tidak ada user
+            navigate("/");
         }
         fetchServices();
-        // fetchOrders();
     }, [navigate]);
 
     const fetchServices = async () => {
@@ -29,15 +28,6 @@ const DashboardAdmin = () => {
             console.error("Error fetching services:", error);
         }
     };
-
-    // const fetchOrders = async () => {
-    //     try {
-    //         const response = await axios.get("http://localhost/api/orders");
-    //         setOrders(response.data);
-    //     } catch (error) {
-    //         console.error("Error fetching orders:", error);
-    //     }
-    // };
 
     return (
         <div className="flex h-screen bg-gray-100">
@@ -107,10 +97,7 @@ const DashboardAdmin = () => {
                     {activeTab === "services" && (
                         <ServiceList fetchServices={fetchServices} />
                     )}
-                    {activeTab === "orders" && (
-                        <OrderList />
-                        // <OrderList fetchOrders={fetchOrders} />
-                    )}
+                    {activeTab === "orders" && <OrderList />}
                 </div>
             </main>
         </div>
